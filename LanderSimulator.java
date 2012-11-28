@@ -1,3 +1,9 @@
+///////////////////////////////////////////////////////////////////////////
+// LanderSimulator.java                                                  //
+// Copyleft Steven Arnow <s@rdw.se> 2012, some rights reserved           //
+///////////////////////////////////////////////////////////////////////////
+
+
 public class LanderSimulator {
 	protected float		fuel_max;
 	protected float		height_max;
