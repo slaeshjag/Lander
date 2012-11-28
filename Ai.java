@@ -83,7 +83,7 @@ public class Ai {
 
 
 	// I curse you Java for not having unsigned ints... //
-	public void Ai(int dimensional_resolution) {
+	public Ai(int dimensional_resolution) {
 		int i;
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,8 +102,6 @@ public class Ai {
 		// I don't know of you need to initialize memory in Java, but I'm not taking any chances //
 		for (i = 0; i < size; i++)
 			motor_on[i] = motor_off[i] = 0;
-		
-		// This should be it! //
 		return;
 	}
 }
