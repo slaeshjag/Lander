@@ -1,4 +1,20 @@
 För att köra simulatorn, kompilera bara alla klasser. Ex: javac *.java
 
-Det finns två klasser med en main-funktion. SimulationController och UnitTest. För att köra själva simuleringen, kör bara klassen Simulation controller: java SimulationController; med alla klasser i cwd.
+Det finns två klasser med en main-funktion. SimulationController och UnitTest. För att köra själva simuleringen, kör bara klassen SimulationController: java SimulationController; med alla klasser i cwd.
 UnitTest körs för testklassen som kontrollerar att misslyckanden och lyckade landningar detekteras korrekt.
+
+
+För själva simulatorn:
+Ai.java
+Lander.java
+LearningMatrix.java
+SimulationController.java
+SimulationRecording.java
+
+
+Och för UnitTest:
+UnitTest.java
+Lander.java
+
+
+Utskriften kan se lite konstig ut i början av varje rad. Jag använder VTx-koder för att tömma skärmen och återställa markören till översta vänstra hörnet. Alla terminalemulatorer stödjer inte detta. En *nix-terminal rekommenderas, dessa stödjer i regel alltid detta.
