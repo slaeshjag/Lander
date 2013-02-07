@@ -1,107 +1,194 @@
-///////////////////////////////////////////////////////////////////////////
-// Ai.java                                                               //
-// Copyleft Steven Arnow <s@rdw.se> 2012, some rights reserved           //
-///////////////////////////////////////////////////////////////////////////
-
-import java.util.Random;
 import java.util.LinkedList;
+import java.util.Random;
+
 
 public class Ai {
-	// This is the dimensional resolution to be used in the learning matrix //
-	private int	dimension_resolution;
+	public static enum DecisionOutcome {
+		SUCCESS,
+		CRASH,
+		FUEL
+	}
+
+
+	/* Order of elements is fuel, velocity and altitude */
+	LearningMatrix				learning_matrix[][][];
+	LinkedList<SimulationRecording>		simulation_recording;
+	Lander					lander;
+	Random					rand;
+	DecisionOutcome				last_attempt;
+
+	final int				max_fuel = 80;
+
+	final int				max_spawn_fuel = 125;
+	final int				max_spawn_altitude = 200;
+	final int				max_spawn_velocity = 5;
+	final int				min_spawn_fuel = 75;
+	final int				min_spawn_altitude = 100;
+	final int				min_spawn_velocity = -5;
+
 	
-	// Used to store the size of the learning matrix //
-	private int	size;
+	public int matrixTranslateFuel() {
+		float fuel = lander.getFuel();
 
-	// Needed when we got no data on motor/no motor in learning matrix //
-	Random rnd;
+		if (fuel < 0)
+			fuel = 0.0f;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// These members are the learning matrix. The parameters fuel, y-velocity and height over ground  //
-	// are used to calculate an index to be used in these arrays. This is marginally faster than a    //
-	// 3 dimensional array, but also a lot prettier.                                                  //
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	private int[]	motor_on;
-	private int[]	motor_off;
+		/* This is completely linear. Easy to translate */
+		return ((int) fuel / (max_fuel / 8) > 7) ? 7 : (int) fuel / (max_fuel / 8);
+	}
 
 
-	// Fills in experience into learning matrix //
-	public void learn(LinkedList<LearnData> data, int num, int success) {
-		int add;
+	public int matrixTranslateAltitude() {
+		float altitude = lander.getAltitude();
 
-		add = (success > 0) ? 2 : -1;
-		for (LearnData l : data) {
-			if (l.motor_stat > 0)
-				motor_on[l.index] += add;
-			else
-				motor_off[l.index] += add;
+		/* Jommpalösning deluxe... */
+		if (altitude < 5)
+			return 0;
+		if (altitude < 10)
+			return 1;
+		if (altitude < 15)
+			return 2;
+		if (altitude < 20)
+			return 3;
+		if (altitude < 25)
+			return 4;
+		if (altitude < 50)
+			return 5;
+		if (altitude < 100)
+			return 6;
+		return 7;
+	}
+
+
+	public int matrixTranslateVelocity() {
+		float velocity = lander.getVelocity();
+
+		/* Ännu en Jommpalösning... */
+		if (velocity < -30)
+			return 0;
+		if (velocity < -20)
+			return 1;
+		if (velocity < -10)
+			return 2;
+		if (velocity < -1)
+			return 3;
+		if (velocity < 1)
+			return 4;
+		if (velocity < 10)
+			return 5;
+		if (velocity < 20)
+			return 6;
+		return 7;
+	}
+
+
+	public boolean decideAction() {
+		int fuel, velocity, altitude;
+
+		fuel = matrixTranslateFuel();
+		velocity = matrixTranslateVelocity();
+		altitude = matrixTranslateAltitude();
+
+		if (learning_matrix[fuel][velocity][altitude].engine_on == learning_matrix[fuel][velocity][altitude].engine_off)
+			return (rand.nextInt(1) > 0) ? true : false;
+		return (learning_matrix[fuel][velocity][altitude].engine_off > learning_matrix[fuel][velocity][altitude].engine_on) ? false : true;
+	}
+
+
+	public void pushLog(boolean motor_on) {
+		SimulationRecording sim_rec = new SimulationRecording();
+
+		sim_rec.fuel = matrixTranslateFuel();
+		sim_rec.velocity = matrixTranslateVelocity();
+		sim_rec.altitude = matrixTranslateAltitude();
+		sim_rec.motor_on = motor_on;
+		simulation_recording.add(sim_rec);
+	}
+
+
+	public void popLogs() {
+		int delta;
+		switch (lander.landerOutcome()) {
+			case SIMULATION_SUCCESS:
+				last_attempt = DecisionOutcome.SUCCESS;
+				delta = 2;
+				break;
+			case SIMULATION_CRASH_FAIL:
+				last_attempt = DecisionOutcome.CRASH;
+				delta = -1;
+				break;
+			case SIMULATION_FUEL_FAIL:
+				last_attempt = DecisionOutcome.FUEL;
+				delta = -1;
+				break;
+			default:
+				delta = 0;
 		}
 
+		for (SimulationRecording sim_rec : simulation_recording) {
+			if (sim_rec.motor_on)
+				learning_matrix[sim_rec.fuel][sim_rec.velocity][sim_rec.altitude].engine_on += delta;
+			else
+				learning_matrix[sim_rec.fuel][sim_rec.velocity][sim_rec.altitude].engine_off += delta;
+		}
+
+		simulation_recording = null;
+	}
+
+
+	public DecisionOutcome getSuccess() {
+		return last_attempt;
+	}
+
+
+	public Ai() {
+		int i, j, k;
+		rand = new Random();
+		last_attempt = DecisionOutcome.SUCCESS;
+		learning_matrix = new LearningMatrix[8][8][8];
+
+		for (i = 0; i < 8; i++)
+			for (j = 0; j < 8; j++)
+				for (k = 0; k < 8; k++)
+					learning_matrix[i][j][k] = new LearningMatrix();
+
 		return;
 	}
-
-
-	// Calculates index in the learning matrix from the simulations parameters //
-	public int index(int fuel, int height, int velocity) {
-		int index;
-		
-		// Check that all parameters are within bounds //
-		if (fuel < 0 || fuel > dimension_resolution);
-			// throw something;
-		if (height < 0 || height > dimension_resolution);
-			// throw something;
-		if (velocity < 0 || velocity > dimension_resolution);
-			//throw ArrayIndexOutOfBoundsException;
-
-		// The actual calculation... */
-		index = fuel * dimension_resolution * dimension_resolution;
-		index += height * dimension_resolution;
-		index += velocity;
-		
-		return index;
-	}
-
 	
-	public int randomAction() {
-		return rnd.nextInt(1);
-		// FIXME: Fix this //
+	/* Spawns a new lander with random parameters */
+	public Lander newLander() {
+		int altitude, velocity, fuel;
+		Lander lander;
+
+		/* We need a new linked list for storing what actions we take during simulation */
+		simulation_recording = new LinkedList<SimulationRecording>();
+		
+		fuel = rand.nextInt(max_spawn_fuel - min_spawn_fuel) + min_spawn_fuel;
+		velocity = rand.nextInt(max_spawn_velocity - min_spawn_velocity) + min_spawn_velocity;
+		altitude = rand.nextInt(max_spawn_altitude - min_spawn_altitude) + min_spawn_altitude;
+		lander = new Lander(velocity, altitude, fuel);
+
+		return lander;
 	}
 
 
-	public int action(int fuel, int height, int velocity) {
-		int index;
 
-		index = index(fuel, height, velocity);
+	/* Returns true when simulation should continue */
+	public boolean simulate() {
+		boolean motor_on, result;
+		if (lander == null)
+			lander = newLander();
+		motor_on = decideAction();
+		pushLog(motor_on);
+		
+		result = lander.loop(motor_on);
 
-		// If the learning matrix have no definite answer, pick one at random //
-		if (motor_on[index] == motor_off[index])
-			return randomAction();
+		/* If false, simulation is over. Learn stuff and get rid of the lander */
+		if (!result) {
+			popLogs();
+			lander = null;
+		}
 
-		// Otherwise, just do what the matrix says //
-		return (motor_on[index] > motor_off[index]) ? 1 : 0;
-	}	
-
-
-	// I curse you Java for not having unsigned ints... //
-	public Ai(int dimensional_resolution) {
-		int i;
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// If the resolution is bigger than 1024, the array size will overflow. I could use a long long int                    //
-		// instead, but that would be silly. 8 GB is enough for a learning matrix, and in Java, that'll probably be 32 real GB //
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if (dimension_resolution <= 0 || dimension_resolution > 1024)
-			//throw someException.ProbablyIn.CamelCase;
-
-		dimension_resolution = dimensional_resolution;
-		size = dimension_resolution * dimension_resolution * dimension_resolution;
-		motor_on = new int[size];
-		motor_off = new int[size];
-		rnd = new Random();
-
-		// I don't know of you need to initialize memory in Java, but I'm not taking any chances //
-		for (i = 0; i < size; i++)
-			motor_on[i] = motor_off[i] = 0;
-		return;
+		return result;
 	}
 }
