@@ -9,7 +9,7 @@ public class SimulationController {
 
 
 		if (args.length < 1) {
-			System.out.println("Usage: java SimulationController.class <simulations>");
+			System.out.println("Usage: java SimulationController <simulations>");
 			System.out.println("Where simulations is the amount of simulations to run in advance before verbose output");
 			return;
 		}
@@ -22,7 +22,6 @@ public class SimulationController {
 			if (i >= target) {
 				success_rate = (int) (((float) success) / (success + fuel_fail + crash_fail) * 100);
 
-				System.out.println("Simulation attempt #" + i + " starting now");
 			}
 
 			/* Simulation loop, iterates until simulation is over */

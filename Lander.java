@@ -62,7 +62,7 @@ public class Lander {
 		return fuel;
 	}
 
-
+	
 	public boolean getEngineStatus() {
 		return last_engine_status;
 	}
