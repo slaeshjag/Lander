@@ -2,6 +2,8 @@ public class Lander {
 	float				velocity;
 	float				altitude;
 	float				fuel;
+	boolean				last_engine_status;
+	
 
 	static final float		gravity = -0.97f;
 	static final float		engine_accel = 5.0f;
@@ -27,6 +29,7 @@ public class Lander {
 	public boolean loop(boolean engine_on) {
 		altitude += velocity;
 		velocity += gravity;
+		last_engine_status = engine_on;
 		if (engine_on == true) {
 			velocity += engine_accel;
 			fuel -= engine_fuel_usage;
@@ -37,7 +40,7 @@ public class Lander {
 
 	/* Determines if the simulation was successful or not */
 	public landerResult landerOutcome() {
-		if (fuel < 0)
+		if (fuel <= 0)
 			return landerResult.SIMULATION_FUEL_FAIL;
 		if (velocity <= crash_velocity)
 			return landerResult.SIMULATION_CRASH_FAIL;
@@ -57,6 +60,11 @@ public class Lander {
 
 	public float getFuel() {
 		return fuel;
+	}
+
+
+	public boolean getEngineStatus() {
+		return last_engine_status;
 	}
 }
 

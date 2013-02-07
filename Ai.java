@@ -172,6 +172,23 @@ public class Ai {
 	}
 
 
+	/* Stuff for SimulatorController to draw ugly text representation */
+	public boolean getEngineStatus() {
+		return lander.getEngineStatus();
+	}
+
+
+	public int getAltitude() {
+		return (int) lander.getAltitude();
+	}
+
+	public int getFuel() {
+		return (int) lander.getFuel();
+	}
+	
+	public int getVelocity() {
+		return (int) lander.getVelocity();
+	}
 
 	/* Returns true when simulation should continue */
 	public boolean simulate() {
