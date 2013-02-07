@@ -6,8 +6,11 @@ public class Lander {
 	
 
 	static final float		gravity = -0.97f;
+
+	/* Egen observation: sätter man dessa till 1 så tar bränslet i princip aldrig slut. Men det verkar som att det ska göra det från uppgiften? */
 	static final float		engine_accel = 5.0f;
 	static final float		engine_fuel_usage = 5.0f;
+
 	static final float		crash_velocity = -10.0f;
 
 	public static enum landerResult {
@@ -16,6 +19,7 @@ public class Lander {
 		SIMULATION_CRASH_FAIL
 	}
 
+	/* Initierar månlandaren med ett förbestämt state */
 	public Lander(float velocity, float altitude, float fuel) {
 		this.velocity = velocity;
 		this.altitude = altitude;
@@ -25,7 +29,7 @@ public class Lander {
 	}
 
 	
-	/* True if simulation should continue */
+	/* True if simulation should continue. Applies physics and engine acceleration */
 	public boolean loop(boolean engine_on) {
 		altitude += velocity;
 		velocity += gravity;

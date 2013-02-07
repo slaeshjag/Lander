@@ -12,6 +12,7 @@ public class Ai {
 
 	/* Order of elements is fuel, velocity and altitude */
 	LearningMatrix				learning_matrix[][][];
+
 	LinkedList<SimulationRecording>		simulation_recording;
 	Lander					lander;
 	Random					rand;
@@ -27,6 +28,7 @@ public class Ai {
 	final int				min_spawn_velocity = -5;
 
 	
+	/* Översätter månlandarens bränslenivå till ett index i arrayen som innehåller inlärningsdatan */
 	public int matrixTranslateFuel() {
 		float fuel = lander.getFuel();
 
@@ -38,6 +40,7 @@ public class Ai {
 	}
 
 
+	/* Översätter månlandarens position till ett index i arrayen som innehåller inlärningsdatan */
 	public int matrixTranslateAltitude() {
 		float altitude = lander.getAltitude();
 
@@ -60,6 +63,7 @@ public class Ai {
 	}
 
 
+	/* Översätter månlandarens hastighet till ett index i arrayen som innehåller inlärningsdatan */
 	public int matrixTranslateVelocity() {
 		float velocity = lander.getVelocity();
 
@@ -82,6 +86,7 @@ public class Ai {
 	}
 
 
+	/* Slår upp månlandarens parametrar i inlärningsmatrisen och använder den för att avgöra om motorn ska vara på eller inte. True är motor på */
 	public boolean decideAction() {
 		int fuel, velocity, altitude;
 
@@ -89,12 +94,16 @@ public class Ai {
 		velocity = matrixTranslateVelocity();
 		altitude = matrixTranslateAltitude();
 
+		/* Är villkoret sant så är det lika mellan på och av. Då väljs motor på eller av slumpvis. */
 		if (learning_matrix[fuel][velocity][altitude].engine_on == learning_matrix[fuel][velocity][altitude].engine_off)
 			return (rand.nextInt(1) > 0) ? true : false;
+		
+		/* Returnerar motor på eller av enligt inlärningsmatris */
 		return (learning_matrix[fuel][velocity][altitude].engine_off > learning_matrix[fuel][velocity][altitude].engine_on) ? false : true;
 	}
 
 
+	/* Sparar ett beslut så att inlärningsmatrisen kan fyllas i efter landningen */
 	public void pushLog(boolean motor_on) {
 		SimulationRecording sim_rec = new SimulationRecording();
 
@@ -106,6 +115,7 @@ public class Ai {
 	}
 
 
+	/* Spelar tillbaka besluten som gjordes under landningen och fyller i inlärningsmatrisen utefter om landningen var lyckad eller inte */
 	public void popLogs() {
 		int delta;
 		switch (lander.landerOutcome()) {
@@ -163,9 +173,12 @@ public class Ai {
 		/* We need a new linked list for storing what actions we take during simulation */
 		simulation_recording = new LinkedList<SimulationRecording>();
 		
+		/* Slumpar fram parametrar för månlandarens startläge */
 		fuel = rand.nextInt(max_spawn_fuel - min_spawn_fuel) + min_spawn_fuel;
 		velocity = rand.nextInt(max_spawn_velocity - min_spawn_velocity) + min_spawn_velocity;
 		altitude = rand.nextInt(max_spawn_altitude - min_spawn_altitude) + min_spawn_altitude;
+
+		/* Skapar en månlandare med dessa parametrar */
 		lander = new Lander(velocity, altitude, fuel);
 
 		return lander;
@@ -190,7 +203,7 @@ public class Ai {
 		return (int) lander.getVelocity();
 	}
 
-	/* Returns true when simulation should continue */
+	/* Returns true when simulation should continue. Links the AI to the lander to make stuff happen. */
 	public boolean simulate() {
 		boolean motor_on, result;
 		if (lander == null)

@@ -2,6 +2,7 @@ public class UnitTest {
 	public static void main(String args[]) {
 		Lander lander;
 
+		/* Kontruktorn injicerar ett state, vi kan låtsas att vi är precis på ett edge-case när något ska detekteras. */
 		/* Lander(velocity, altitude, fuel); */
 		
 		

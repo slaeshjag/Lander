@@ -19,10 +19,7 @@ public class SimulationController {
 		success_rate = 0;
 
 		for (i = 0; ; i++) {
-			if (i >= target) {
-				success_rate = (int) (((float) success) / (success + fuel_fail + crash_fail) * 100);
-
-			}
+			
 
 			/* Simulation loop, iterates until simulation is over */
 			for (;;) {
@@ -39,7 +36,7 @@ public class SimulationController {
 				/* Try to remove some flicker with VT100 codes... (Clear screen) */
 				System.out.print("\033[2J");
 				/* Set cursor position to top of screen */
-				System.out.print("\033[f");
+				System.out.print("\033[;f");
 
 				status = simulation.getEngineStatus();
 				altitude = simulation.getAltitude();
@@ -53,7 +50,8 @@ public class SimulationController {
 				System.out.println("Statistics: Successful: " + success + ", Out of fuel: " + fuel_fail + ", Crashed into surface: " + crash_fail);
 				System.out.println("Success rate: " + success_rate);
 				System.out.println("===========================================");
-				
+			
+				/* Skriver ut månlandaren */
 				System.out.print("##¦");
 				for (j = 0; j < altitude / 8; j++)
 					System.out.print(" ");
@@ -84,6 +82,8 @@ public class SimulationController {
 			}
 			
 			if (i >= target) {
+				success_rate = (int) (((float) success) / (success + fuel_fail + crash_fail) * 100);
+				
 				try {
 					Thread.sleep(2000);
 				} catch (Exception ex) {

@@ -1,0 +1,4 @@
+För att köra simulatorn, kompilera bara alla klasser. Ex: javac *.java
+
+Det finns två klasser med en main-funktion. SimulationController och UnitTest. För att köra själva simuleringen, kör bara klassen Simulation controller: java SimulationController; med alla klasser i cwd.
+UnitTest körs för testklassen som kontrollerar att misslyckanden och lyckade landningar detekteras korrekt.
